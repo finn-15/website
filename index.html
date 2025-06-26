@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khoảnh Khắc Kỷ Niệm</title>
+    <style>
+        :root {
+            --system-blue: #007AFF;
+            --system-pink: #FF2D55;
+            --system-gray: #8E8E93;
+            --system-gray-light: #E5E5EA;
+            --system-background: #F2F2F7;
+            --card-background: #FFFFFF;
+            --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --modal-background: rgba(0, 0, 0, 0.4);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--system-background);
+            color: #1C1C1E;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            overscroll-behavior-y: contain;
+        }
+        
+        .container {
+            max-width: 100%;
+            min-height: 100vh;
+            padding: 20px 20px 80px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 10px;
+        }
+        
+        h1 {
+            font-weight: 700;
+            font-size: 32px;
+            margin-bottom: 6px;
+            color: #000;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            color: var(--system-gray);
+            font-size: 16px;
+            font-weight: 400;
+        }
+        
+        /* Tab content */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Upload card */
+        .upload-card {
+            background: var(--card-background);
+            border-radius: 14px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+        
+        .upload-area {
+            border: 2px dashed #D1D1D6;
+            border-radius: 12px;
+            padding: 40px 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--system-blue);
+            background: rgba(0, 122, 255, 0.03);
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: var(--system-blue);
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            background: var(--system-blue);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-size: 17px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: #0062CC;
+            transform: scale(0.98);
+        }
+        
+        /* Gallery */
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 30px 0 15px;
+            padding-left: 5px;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+        
+        .photo-card {
+            background: var(--card-background);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            aspect-ratio: 1;
+            cursor: pointer;
+        }
+        
+        .photo-card:hover {
+            transform: scale(0.98);
+        }
+        
+        .photo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .photo-date {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            color: white;
+            padding: 8px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .favorite-icon {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            font-size: 18px;
+            opacity: 0.9;
+            z-index: 2;
+        }
+        
+        .favorite-icon.favorited {
+            color: var(--system-pink);
+        }
+        
+        /* Memory card */
+        .memory-card {
+            background: var(--card-background);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .memory-card img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 16px;
+        }
+        
+        .memory-text {
+            flex: 1;
+        }
+        
+        .memory-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 17px;
+        }
+        
+        .memory-date {
+            color: var(--system-gray);
+            font-size: 14px;
+        }
+        
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--modal-background);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .modal-image {
+            max-height: 80vh;
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .modal-actions {
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .modal-btn {
+            background: rgba(255, 255, 255, 0.9);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal-btn.delete {
+            color: var(--system-pink);
+        }
+        
+        .modal-btn.favorite {
+            color: var(--system-gray);
+        }
+        
+        .modal-btn.favorite.active {
+            color: var(--system-pink);
+        }
+        
+        /* Tab bar - ĐÃ CẬP NHẬT */
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 100;
+        }
+        
+        .tab-item {
+            text-align: center;
+            color: var(--system-gray);
+            padding: 12px 0;
+            flex: 1;
+            max-width: 33.33%;
+            opacity: 0.7;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border-radius: 12px;
+            margin: 0 4px;
+        }
+        
+        .tab-item:hover {
+            background: rgba(0, 122, 255, 0.08);
+            opacity: 0.9;
+            transform: translateY(-3px);
+        }
+        
+        .tab-item.active {
+            color: var(--system-blue);
+            opacity: 1;
+        }
+        
+        .tab-item.active .tab-icon {
+            transform: scale(1.1);
+        }
+        
+        .tab-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .tab-label {
+            font-size: 12px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .tab-item:active {
+            transform: translateY(0) scale(0.95);
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--system-gray);
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        /* Animation */
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.3); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Khoảnh Khắc</h1>
+            <p class="subtitle">Lưu giữ những khoảnh khắc đáng nhớ</p>
+        </header>
+        
+        <!-- Today Tab -->
+        <div id="todayTab" class="tab-content active">
+            <div class="upload-card">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📷</div>
+                    <h3>Thêm khoảnh khắc mới</h3>
+                    <p>Kéo thả ảnh vào đây hoặc</p>
+                    <button class="btn" id="selectFileBtn">Chọn ảnh</button>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+            </div>
+            
+            <h2 class="section-title">Kỷ niệm hôm nay</h2>
+            <div id="memoriesContainer">
+                <!-- Memory cards will appear here -->
+                <div class="empty-state">
+                    <div class="empty-icon">🕰️</div>
+                    <p>Chưa có kỷ niệm nào vào ngày này</p>
+                </div>
+            </div>
+            
+            <h2 class="section-title">Ảnh gần đây</h2>
+            <div class="gallery" id="todayGallery">
+                <!-- Today's photos will appear here -->
+            </div>
+        </div>
+        
+        <!-- History Tab -->
+        <div id="historyTab" class="tab-content">
+            <h2 class="section-title">Tất cả khoảnh khắc</h2>
+            <div class="gallery" id="historyGallery">
+                <!-- All photos will appear here -->
+            </div>
+        </div>
+        
+        <!-- Favorites Tab -->
+        <div id="favoritesTab" class="tab-content">
+            <h2 class="section-title">Yêu thích</h2>
+            <div class="gallery" id="favoritesGallery">
+                <!-- Favorite photos will appear here -->
+                <div class="empty-state">
+                    <div class="empty-icon">❤️</div>
+                    <p>Chưa có ảnh nào được yêu thích</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Image Modal -->
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">✕</button>
+            <img class="modal-image" id="modalImage" src="" alt="Full size photo">
+            <div class="modal-actions">
+                <button class="modal-btn delete" id="deleteBtn">🗑️</button>
+                <button class="modal-btn favorite" id="favoriteBtn">❤️</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+        <div class="tab-item active" data-tab="todayTab">
+            <div class="tab-icon">📅</div>
+            <div class="tab-label">Hôm nay</div>
+        </div>
+        <div class="tab-item" data-tab="historyTab">
+            <div class="tab-icon">🖼️</div>
+            <div class="tab-label">Lịch sử</div>
+        </div>
+        <div class="tab-item" data-tab="favoritesTab">
+            <div class="tab-icon">❤️</div>
+            <div class="tab-label">Yêu thích</div>
+        </div>
+    </div>
+    
+    <script>
+        // Lưu trữ ảnh trong localStorage
+        let photos = JSON.parse(localStorage.getItem('photos')) || [];
+        let currentModalPhotoId = null;
+        
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const selectFileBtn = document.getElementById('selectFileBtn');
+        const fileInput = document.getElementById('fileInput');
+        const todayGallery = document.getElementById('todayGallery');
+        const historyGallery = document.getElementById('historyGallery');
+        const favoritesGallery = document.getElementById('favoritesGallery');
+        const memoriesContainer = document.getElementById('memoriesContainer');
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalClose = document.getElementById('modalClose');
+        const deleteBtn = document.getElementById('deleteBtn');
+        const favoriteBtn = document.getElementById('favoriteBtn');
+        const tabItems = document.querySelectorAll('.tab-item');
+        const tabContents = {
+            todayTab: document.getElementById('todayTab'),
+            historyTab: document.getElementById('historyTab'),
+            favoritesTab: document.getElementById('favoritesTab')
+        };
+        
+        // Khởi tạo ứng dụng
+        initApp();
+        
+        function initApp() {
+            setupEventListeners();
+            renderAllGalleries();
+            checkMemories();
+        }
+        
+        function setupEventListeners() {
+            // Upload ảnh
+            uploadArea.addEventListener('click', () => fileInput.click());
+            selectFileBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            // Kéo thả ảnh
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleDrop);
+            
+            // Modal
+            modalClose.addEventListener('click', closeModal);
+            deleteBtn.addEventListener('click', deleteCurrentPhoto);
+            favoriteBtn.addEventListener('click', toggleFavorite);
+            
+            // Tab navigation
+            tabItems.forEach(item => {
+                item.addEventListener('click', switchTab);
+            });
+        }
+        
+        // Xử lý upload ảnh
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                uploadPhoto(file);
+            }
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'var(--system-blue)';
+            uploadArea.style.backgroundColor = 'rgba(0, 122, 255, 0.03)';
+        }
+        
+        function handleDragLeave() {
+            uploadArea.style.borderColor = '#D1D1D6';
+            uploadArea.style.backgroundColor = 'transparent';
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            handleDragLeave();
+            
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                uploadPhoto(file);
+            }
+        }
+        
+        function uploadPhoto(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const photoData = {
+                    id: Date.now(),
+                    dataUrl: e.target.result,
+                    date: new Date().toISOString(),
+                    year: new Date().getFullYear(),
+                    isFavorite: false
+                };
+                
+                photos.unshift(photoData);
+                savePhotos();
+                renderAllGalleries();
+                checkMemories();
+                
+                // Hiệu ứng khi upload thành công
+                showUploadSuccess();
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function showUploadSuccess() {
+            uploadArea.innerHTML = `
+                <div style="color: var(--system-blue); font-size: 48px; animation: bounce 0.5s;">✓</div>
+                <h3>Thành công!</h3>
+                <p>Khoảnh khắc đã được lưu</p>
+            `;
+            
+            setTimeout(() => {
+                uploadArea.innerHTML = `
+                    <div class="upload-icon">📷</div>
+                    <h3>Thêm khoảnh khắc mới</h3>
+                    <p>Kéo thả ảnh vào đây hoặc</p>
+                    <button class="btn" id="selectFileBtn">Chọn ảnh</button>
+                `;
+            }, 2000);
+        }
+        
+        // Hiển thị ảnh
+        function renderAllGalleries() {
+            renderGallery(todayGallery, photos.slice(0, 12)); // Hiển thị 12 ảnh gần nhất
+            renderGallery(historyGallery, photos);
+            renderGallery(favoritesGallery, photos.filter(photo => photo.isFavorite));
+        }
+        
+        function renderGallery(container, photosToShow) {
+            container.innerHTML = '';
+            
+            if (photosToShow.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'empty-state';
+                emptyState.innerHTML = container.id === 'favoritesGallery' ? 
+                    `<div class="empty-icon">❤️</div><p>Chưa có ảnh nào được yêu thích</p>` :
+                    `<div class="empty-icon">🖼️</div><p>Không có ảnh nào</p>`;
+                container.appendChild(emptyState);
+                return;
+            }
+            
+            photosToShow.forEach(photo => {
+                const photoDate = new Date(photo.date);
+                const formattedDate = photoDate.toLocaleDateString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit'
+                });
+                
+                const photoCard = document.createElement('div');
+                photoCard.className = 'photo-card';
+                photoCard.innerHTML = `
+                    <img src="${photo.dataUrl}" alt="Uploaded photo" data-id="${photo.id}">
+                    <div class="photo-date">${formattedDate}</div>
+                    <div class="favorite-icon ${photo.isFavorite ? 'favorited' : ''}">${photo.isFavorite ? '❤️' : '🤍'}</div>
+                `;
+                
+                // Mở modal khi click ảnh
+                photoCard.querySelector('img').addEventListener('click', (e) => {
+                    openModal(photo.id);
+                });
+                
+                container.appendChild(photoCard);
+            });
+        }
+        
+        // Kiểm tra kỷ niệm
+        function checkMemories() {
+            memoriesContainer.innerHTML = '';
+            const today = new Date();
+            const todayMonthDay = `${today.getMonth() + 1}-${today.getDate()}`;
+            
+            const memories = photos.filter(photo => {
+                const photoDate = new Date(photo.date);
+                const photoMonthDay = `${photoDate.getMonth() + 1}-${photoDate.getDate()}`;
+                return photoMonthDay === todayMonthDay && photoDate.getFullYear() < today.getFullYear();
+            });
+            
+            if (memories.length === 0) {
+                memoriesContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🕰️</div>
+                        <p>Chưa có kỷ niệm nào vào ngày này</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            memories.forEach(photo => {
+                const photoDate = new Date(photo.date);
+                const yearsAgo = today.getFullYear() - photoDate.getFullYear();
+                const formattedDate = photoDate.toLocaleDateString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+                
+                const memoryCard = document.createElement('div');
+                memoryCard.className = 'memory-card';
+                memoryCard.innerHTML = `
+                    <img src="${photo.dataUrl}" alt="Memory">
+                    <div class="memory-text">
+                        <div class="memory-title">Kỷ niệm ${yearsAgo} năm</div>
+                        <div class="memory-date">${formattedDate}</div>
+                    </div>
+                    <div class="favorite-icon ${photo.isFavorite ? 'favorited' : ''}">${photo.isFavorite ? '❤️' : '🤍'}</div>
+                `;
+                
+                // Mở modal khi click memory
+                memoryCard.addEventListener('click', () => {
+                    openModal(photo.id);
+                });
+                
+                memoriesContainer.appendChild(memoryCard);
+            });
+        }
+        
+        // Modal functions
+        function openModal(photoId) {
+            const photo = photos.find(p => p.id === photoId);
+            if (!photo) return;
+            
+            currentModalPhotoId = photoId;
+            modalImage.src = photo.dataUrl;
+            imageModal.classList.add('active');
+            
+            // Cập nhật trạng thái nút yêu thích
+            updateFavoriteButton(photo.isFavorite);
+        }
+        
+        function closeModal() {
+            imageModal.classList.remove('active');
+            currentModalPhotoId = null;
+        }
+        
+        function deleteCurrentPhoto() {
+            if (!currentModalPhotoId) return;
+            
+            if (confirm('Bạn chắc chắn muốn xóa ảnh này?')) {
+                photos = photos.filter(photo => photo.id !== currentModalPhotoId);
+                savePhotos();
+                renderAllGalleries();
+                checkMemories();
+                closeModal();
+            }
+        }
+        
+        function toggleFavorite() {
+            if (!currentModalPhotoId) return;
+            
+            const photoIndex = photos.findIndex(p => p.id === currentModalPhotoId);
+            if (photoIndex === -1) return;
+            
+            photos[photoIndex].isFavorite = !photos[photoIndex].isFavorite;
+            savePhotos();
+            
+            // Cập nhật UI
+            updateFavoriteButton(photos[photoIndex].isFavorite);
+            renderAllGalleries();
+            checkMemories();
+            
+            // Hiệu ứng trái tim
+            favoriteBtn.style.animation = 'none';
+            setTimeout(() => {
+                favoriteBtn.style.animation = 'heartBeat 0.6s';
+            }, 10);
+        }
+        
+        function updateFavoriteButton(isFavorite) {
+            favoriteBtn.classList.toggle('active', isFavorite);
+            favoriteBtn.innerHTML = isFavorite ? '❤️' : '🤍';
+        }
+        
+        // Tab navigation
+        function switchTab(e) {
+            const tabId = e.currentTarget.getAttribute('data-tab');
+            
+            // Cập nhật tab active
+            tabItems.forEach(item => item.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            
+            // Hiển thị nội dung tab tương ứng
+            Object.values(tabContents).forEach(content => {
+                content.classList.remove('active');
+            });
+            tabContents[tabId].classList.add('active');
+        }
+        
+        // Lưu ảnh vào localStorage
+        function savePhotos() {
+            localStorage.setItem('photos', JSON.stringify(photos));
+        }
+    </script>
+</body>
+</html>
